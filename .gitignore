@@ -1,0 +1,21 @@
+# Android
+.gradle/
+build/
+local.properties
+*.iml
+.idea/
+
+# Kotlin
+*.class
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# .NET
+bin/
+obj/
+
+# VS
+.vs/

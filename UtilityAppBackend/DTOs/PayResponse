@@ -1,0 +1,6 @@
+public class PayResponse
+{
+    public double TotalAmount { get; set; }
+    public int BillCount { get; set; }
+    public string Status { get; set; }
+}
