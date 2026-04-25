@@ -213,7 +213,14 @@ fun MContent(
                 val listState = rememberLazyListState()
                 val density = LocalDensity.current
                 val flingBehavior = rememberSnapFlingBehavior(listState)
-
+                LaunchedEffect(listState) {
+                    snapshotFlow { listState.firstVisibleItemIndex }
+                        .collect { index ->
+                            if (index < viewModel.cards.size) {
+                                viewModel.selectCard(viewModel.cards[index])
+                            }
+                        }
+                }
                 LaunchedEffect(viewModel.cards) {
                     if (viewModel.cards.isNotEmpty()) {
                         viewModel.selectCard(viewModel.cards.first())

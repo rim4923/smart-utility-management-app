@@ -45,6 +45,7 @@ import com.patrykandpatrick.vico.core.chart.line.LineChart
 import com.patrykandpatrick.vico.core.component.shape.shader.DynamicShaders
 import com.patrykandpatrick.vico.core.entry.entryModelOf
 import com.patrykandpatrick.vico.core.entry.entryOf
+import kotlin.math.absoluteValue
 
 @Composable
 fun ForecastBottomSheet(
@@ -87,7 +88,7 @@ fun ForecastBottomSheet(
             Spacer(Modifier.height(6.dp))
 
             Text(
-                "Next 6 months",
+                "Next 3 months",
                 color = Color.Gray,
                 fontSize = 13.sp
             )
@@ -124,10 +125,10 @@ fun ForecastBottomSheet(
 
                     Text(
                         text = if (summary.percentageChange >= 0)
-                            "↗ ${summary.percentageChange}% higher than"
+                            "↗ ${summary.percentageChange.absoluteValue}% higher than"
                         else
-                            "↘ ${summary.percentageChange}% lower than",
-                        color = if (summary.percentageChange >= 0) Color(0xFFFF6B6B) else Color(
+                            "↘ ${summary.percentageChange.absoluteValue}% lower than",
+                        color = if (summary.percentageChange > 0) Color(0xFFFF6B6B) else Color(
                             0xFF4CAF50
                         ),
                         fontSize = 13.sp,
@@ -136,7 +137,7 @@ fun ForecastBottomSheet(
                     Spacer(Modifier.height(5.dp))
                     Text(
                         "last month",
-                        color = if (summary.percentageChange >= 0) Color(0xFFFF6B6B) else Color(
+                        color = if (summary.percentageChange > 0) Color(0xFFFF6B6B) else Color(
                             0xFF4CAF50
                         ),
                         fontSize = 13.sp,
@@ -208,7 +209,7 @@ fun ForecastBottomSheet(
                             text = if (item.changePercentage >= 0)
                                 "▲ ${item.changePercentage}%"
                             else
-                                "▼ ${item.changePercentage}%",
+                                "▼ ${item.changePercentage.absoluteValue}%",
                             fontSize = 12.sp,
                             color = if (item.changePercentage <= 0)
                                 Color(0xFF4CAF50)

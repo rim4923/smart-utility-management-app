@@ -141,7 +141,7 @@ fun InsightsCard(
 @Composable
 fun ChangeIndicator(percentage: Double) {
     val isIncrease = percentage >= 0
-    val color = if (isIncrease) Color(0xFF4CAF50) else Color(0xFFF44336)
+    val color = if (!isIncrease) Color(0xFF4CAF50) else Color(0xFFF44336)
 
     Row(
         verticalAlignment = Alignment.Bottom

@@ -9,7 +9,7 @@ data class DashboardResponse(
     val glanceCard: GlanceModelResponse,
     val utilities: List<UtilityResponse>,
     val chartData: List<Double>,
-    val topExpenses: List<ExpenseDto>,
+    val topExpenses: List<ExpenseResponse>,
     val insights: InsightsResponse,
     val forecast: UpcomingForecastResponse,
     val forecastDetails: ForecastDetailsResponse?
@@ -19,7 +19,7 @@ data class DashboardResponse(
             glanceCard = glanceCard.toDto(),
             utilities = utilities.map { it.toDto() },
             chartData = chartData,
-            topExpenses = topExpenses,
+            topExpenses = topExpenses.map { it.toDto() },
             insights = insights.toDto(),
             forecast = forecast.toDto(),
             forecastDetails = forecastDetails?.toDto()
@@ -35,6 +35,24 @@ data class UpcomingForecastResponse(
         return UpcomingForecastDto(
             nextMonthAmount = nextMonthAmount ?: 0.0,
             percentageChange = percentageChange ?: 0.0
+        )
+    }
+}
+
+data class ExpenseResponse(
+    val type: String?,
+    val amount: Double?,
+    val currency: String?
+) {
+    fun toDto(): ExpenseDto {
+        val mt = runCatching {
+            MeterType.valueOf((type ?: "").uppercase())
+        }.getOrElse { MeterType.ELECTRICITY }
+
+        return ExpenseDto(
+            type = mt,
+            amount = amount ?: 0.0,
+            currency = currency ?: "USD"
         )
     }
 }

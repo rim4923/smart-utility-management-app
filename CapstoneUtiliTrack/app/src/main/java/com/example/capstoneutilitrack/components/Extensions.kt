@@ -41,8 +41,3 @@ fun UtilityModelDto.currencySymbol(): String = when (currency.uppercase()) {
     "EUR" -> "€"
     else -> currency
 }
-
-fun UtilityModelDto.formattedDate(): String {
-    val sdf = SimpleDateFormat("dd MMM", Locale.US)
-    return sdf.format(nextBillDate)
-}

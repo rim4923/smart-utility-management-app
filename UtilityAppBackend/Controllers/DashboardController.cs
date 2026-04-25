@@ -89,8 +89,7 @@ namespace UtilityAppBackend.Controllers
         double xAvg = Enumerable.Range(0, n).Average();
         double yAvg = weekly.Average();
 
-        double num = 0;
-        double den = 0;
+        double num = 0, den = 0;
 
         for (int i = 0; i < n; i++)
         {
@@ -107,57 +106,97 @@ namespace UtilityAppBackend.Controllers
             {9, 1.05}, {10, 1.00}, {11, 0.97}, {12, 1.08}
         };
 
-        var forecastItems = new List<MonthlyForecastItemDto>();
-        var pastMonths = Enumerable.Range(0, 3)
+        var monthlyData = Enumerable.Range(0, 3)
             .Select(i => now.AddMonths(-i))
             .Reverse()
+            .Select(m => new
+            {
+                Date = m,
+                Total = bills
+                    .Where(b => b.NextBillDate.Month == m.Month && b.NextBillDate.Year == m.Year)
+                    .Sum(b => b.Cost)
+            })
             .ToList();
-
-        foreach (var m in pastMonths)
-        {
-            var total = bills
-                .Where(b => b.NextBillDate.Month == m.Month && b.NextBillDate.Year == m.Year)
-                .Sum(b => b.Cost);
-
-            forecastItems.Add(new MonthlyForecastItemDto
-            {
-                Month = m.ToString("MMMM"),
-                Amount = Math.Round(total, 2),
-                IsForecast = false,
-                ChangePercentage = 0
-            });
-        }
-
-        double lastActual = forecastItems.LastOrDefault()?.Amount ?? currentTotal;
-        for (int i = 1; i <= 3; i++)
-        {
-            var futureDate = now.AddMonths(i);
-
-            double seasonalFactor = seasonalMap.ContainsKey(futureDate.Month)
-                ? seasonalMap[futureDate.Month]
-                : 1.0;
-
-            double prediction =
-                (level + (trnd * i * 4)) * seasonalFactor;
-            prediction = (prediction * 0.7) + (lastActual * 0.3);
-
-            double change = lastActual == 0 ? 0 :
-                ((prediction - lastActual) / lastActual) * 100;
-
-            forecastItems.Add(new MonthlyForecastItemDto
-            {
-                Month = futureDate.ToString("MMMM"),
-                Amount = Math.Round(prediction, 2),
-                IsForecast = true,
-                ChangePercentage = Math.Round(change, 1)
-            });
-            lastActual = prediction;
-        } 
-        if (weekly.Count < 6)
-        {
-            forecastItems.Clear(); 
-        }
         
+        
+        List<MonthlyForecastItemDto> forecastItems;
+        if (monthlyData.Count < 3 || monthlyData.All(x => x.Total == 0))
+        {
+            forecastItems = new List<MonthlyForecastItemDto>();
+        }
+        else
+        {
+            var values = monthlyData.Select(x => x.Total).ToArray();
+            int n2 = values.Length;
+
+            double xAvg2 = Enumerable.Range(0, n2).Average();
+            double yAvg2 = values.Average();
+
+            double num2 = 0, den2 = 0;
+            for (int i = 0; i < n2; i++)
+            {
+                num2 += (i - xAvg2) * (values[i] - yAvg2);
+                den2 += Math.Pow(i - xAvg2, 2);
+            }
+
+            double slope = den2 == 0 ? 0 : num2 / den2;
+
+            double momentum = (values[n2 - 1] - values[n2 - 2]);
+
+            forecastItems = new List<MonthlyForecastItemDto>();
+
+            foreach (var m in monthlyData)
+            {
+                forecastItems.Add(new MonthlyForecastItemDto
+                {
+                    Month = m.Date.ToString("MMMM"),
+                    Amount = Math.Round(m.Total, 2),
+                    IsForecast = false,
+                    ChangePercentage = 0
+                });
+            }
+
+            double lastValue = values.Last();
+
+            // 7. Forecast next 3 months
+            for (int i = 1; i <= 3; i++)
+            {
+                var futureDate = now.AddMonths(i);
+
+                double seasonalFactor = seasonalMap.ContainsKey(futureDate.Month)
+                    ? seasonalMap[futureDate.Month]
+                    : 1.0;
+
+                // Core prediction
+                double prediction =
+                    lastValue +
+                    (slope * i) +          // long-term trend
+                    (momentum * 0.3 * i);  // short-term acceleration
+
+                // Apply seasonality
+                prediction *= seasonalFactor;
+
+                // Safety clamp (avoid crazy jumps)
+                double maxIncrease = lastValue * 1.15;
+                double minDecrease = lastValue * 0.90;
+
+                if (prediction > maxIncrease) prediction = maxIncrease;
+                if (prediction < minDecrease) prediction = minDecrease;
+
+                double change = lastValue == 0 ? 0 :
+                    ((prediction - lastValue) / lastValue) * 100;
+
+                forecastItems.Add(new MonthlyForecastItemDto
+                {
+                    Month = futureDate.ToString("MMMM"),
+                    Amount = Math.Round(prediction, 2),
+                    IsForecast = true,
+                    ChangePercentage = Math.Round(change, 1)
+                });
+
+                lastValue = prediction;
+            }
+        }
         double weeklyTrend = 0;
         double weeklyAverageValue = 0;
 
