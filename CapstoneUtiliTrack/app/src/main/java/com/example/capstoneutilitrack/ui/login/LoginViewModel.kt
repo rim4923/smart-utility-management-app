@@ -45,9 +45,7 @@ class LoginViewModel @Inject constructor(
         } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             emailError = "Please enter a valid email."
             isValid = false
-        }
-
-        if (password.isBlank()) {
+        }else if (password.isBlank()) {
             passwordError = "Please enter your password."
             isValid = false
         }
@@ -82,8 +80,12 @@ class LoginViewModel @Inject constructor(
                 prefs.edit().putString("jwt", token).apply()
 
                 loginSuccess = true
+                errorMessage = null
+                emailError = null
+                passwordError = null
             } else {
-                val errorMsg = result.errorBody()?.string() ?: "Login failed"
+                val raw = result.errorBody()?.string()
+                val errorMsg = raw ?: "Login failed"
 
                 when {
                     errorMsg.contains("not found", true) ->
@@ -93,7 +95,7 @@ class LoginViewModel @Inject constructor(
                         passwordError = "Incorrect password"
 
                     errorMsg.contains("not verified", true) ->
-                        errorMessage = "Please verify your account first"
+                        emailError = "Please verify your account first"
 
                     else ->
                         errorMessage = errorMsg

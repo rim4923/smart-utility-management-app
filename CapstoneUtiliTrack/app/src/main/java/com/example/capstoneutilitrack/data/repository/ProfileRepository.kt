@@ -4,6 +4,7 @@ import com.example.capstoneutilitrack.data.network.ProfileApi
 import com.example.capstoneutilitrack.data.network.ProfileDto
 import com.example.capstoneutilitrack.data.network.UpdateNotificationRequest
 import com.example.capstoneutilitrack.data.network.UpdateProfileRequest
+import com.example.capstoneutilitrack.data.remote.safeApiCall
 import okhttp3.MultipartBody
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -13,14 +14,9 @@ class ProfileRepository @Inject constructor(
     private val api: ProfileApi
 ) {
     suspend fun getProfile(): ProfileDto {
-        val response = api.getProfile()
-
-        if (response.isSuccessful) {
-            return response.body()!!
-        } else {
-            throw Exception("Profile fetch failed: ${response.code()}")
-        }
+        return safeApiCall { api.getProfile() }
     }
+
     suspend fun updateProfile(request: UpdateProfileRequest) {
         val response = api.updateProfile(request)
         if (!response.isSuccessful) {

@@ -57,7 +57,6 @@ fun MCntent(
     navController: NavController,
     viewModel: PaymentViewModel
 ) {
-    Log.d("VM", viewModel.hashCode().toString())
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -71,8 +70,15 @@ fun MCntent(
         val bills = session?.bills ?: emptyList()
         val context = LocalContext.current
 
-        LaunchedEffect(Unit) {
-            viewModel.loadCards()
+        if (session == null) {
+            Text("No payment session found")
+            return
+        }
+
+        LaunchedEffect(viewModel.cards.isEmpty()) {
+            if (viewModel.cards.isEmpty()) {
+                viewModel.loadCards()
+            }
         }
         Row(
             modifier = Modifier
@@ -264,7 +270,12 @@ fun MCntent(
                     )
                 )
                 .clickable {
-                    if (!viewModel.isLoading) {
+                    if (card == null) {
+                        Toast.makeText(context, "Please select a card", Toast.LENGTH_SHORT).show()
+                        return@clickable
+                    }
+
+                    if (!viewModel.isLoading && card != null) {
                         viewModel.payBills {
                             Toast.makeText(context, "Payment successful 🎉", Toast.LENGTH_SHORT).show()
 

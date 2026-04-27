@@ -1,6 +1,7 @@
 package com.example.capstoneutilitrack.ui.payment
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -28,6 +29,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -64,7 +66,13 @@ fun MContent(
     LaunchedEffect(Unit) {
         viewModel.loadCards()
     }
+    val context = LocalContext.current
 
+    LaunchedEffect(viewModel.errorMessage) {
+        viewModel.errorMessage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+        }
+    }
     val selectedCard = viewModel.selectedCard
 
     Column(
@@ -213,13 +221,28 @@ fun MContent(
                 val listState = rememberLazyListState()
                 val density = LocalDensity.current
                 val flingBehavior = rememberSnapFlingBehavior(listState)
-                LaunchedEffect(listState) {
-                    snapshotFlow { listState.firstVisibleItemIndex }
-                        .collect { index ->
-                            if (index < viewModel.cards.size) {
-                                viewModel.selectCard(viewModel.cards[index])
-                            }
-                        }
+                LaunchedEffect(
+                    listState.firstVisibleItemIndex,
+                    listState.firstVisibleItemScrollOffset,
+                    viewModel.cards.size
+                ) {
+                    if (viewModel.cards.isEmpty()) return@LaunchedEffect
+
+                    val itemWidthPx = with(density) {
+                        320.dp.toPx() + 16.dp.toPx()
+                    }
+
+                    val offset = listState.firstVisibleItemScrollOffset.toFloat()
+
+                    val centerIndex =
+                        if (offset > itemWidthPx / 2)
+                            listState.firstVisibleItemIndex + 1
+                        else
+                            listState.firstVisibleItemIndex
+
+                    if (centerIndex < viewModel.cards.size) {
+                        viewModel.selectCard(viewModel.cards[centerIndex])
+                    }
                 }
                 LaunchedEffect(viewModel.cards) {
                     if (viewModel.cards.isNotEmpty()) {

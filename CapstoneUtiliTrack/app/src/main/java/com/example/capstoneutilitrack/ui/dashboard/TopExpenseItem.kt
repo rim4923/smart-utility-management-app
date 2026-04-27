@@ -76,7 +76,7 @@ fun TopExpensesCard(
 
             if (expenses.isEmpty()) {
                 Text(
-                    "Data not yet valid",
+                    "No expenses data yet",
                     color = Color.Gray,
                     fontSize = 12.sp
                 )

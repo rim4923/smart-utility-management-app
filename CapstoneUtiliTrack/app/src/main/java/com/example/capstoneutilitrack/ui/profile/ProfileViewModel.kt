@@ -105,7 +105,12 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val stream = context.contentResolver.openInputStream(uri)
-                val file = stream!!.readBytes()
+                if (stream == null) {
+                    profileState = profileState.copy(error = "Failed to read image")
+                    return@launch
+                }
+
+                val file = stream.readBytes()
 
                 val requestBody = file.toRequestBody("image/*".toMediaType())
                 val part = MultipartBody.Part.createFormData(

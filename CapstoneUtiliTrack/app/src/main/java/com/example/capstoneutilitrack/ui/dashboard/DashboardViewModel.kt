@@ -39,12 +39,9 @@ class DashboardViewModel @Inject constructor(
             val result = repository.getDashboard()
 
             result.onSuccess {
-                Log.d("DashboardVM", "Dashboard loaded successfully: $it")
-
                 forecastDetails = it.forecastDetails
                 dashboardState = it
             }.onFailure {
-                Log.e("DashboardVM", "Failed to load dashboard", it)
                 errorMessage = it.message ?: "Failed to load dashboard"
             }
 

@@ -265,51 +265,6 @@ fun SignUpScreenOne(
 
                     Spacer(Modifier.height(24.dp))
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Divider(modifier = Modifier.weight(1f))
-                        Text(
-                            text = "  Sign up with  ",
-                            fontSize = 14.sp,
-                            color = Color.Gray
-                        )
-                        Divider(modifier = Modifier.weight(1f))
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(
-                            30.dp,
-                            Alignment.CenterHorizontally
-                        )
-                    ) {
-                        listOf(
-                            R.drawable.ic_apple to "Apple",
-                            R.drawable.ic_facebook to "Facebook",
-                            R.drawable.ic_google to "Google"
-                        ).forEach { (iconRes, contentDesc) ->
-                            Box(
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .clip(CircleShape)
-                                    .clickable { },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Image(
-                                    painter = painterResource(id = iconRes),
-                                    contentDescription = contentDesc,
-                                    modifier = Modifier.size(50.dp)
-                                )
-                            }
-
-                        }
-                    }
-
-                    Spacer(Modifier.height(20.dp))
 
                     val annotatedText = buildAnnotatedString {
                         append("Already have an account? ")

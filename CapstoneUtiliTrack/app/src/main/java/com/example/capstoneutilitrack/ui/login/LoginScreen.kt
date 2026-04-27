@@ -1,5 +1,6 @@
 package com.example.capstoneutilitrack.ui.login
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -43,6 +44,7 @@ import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -54,10 +56,16 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit = {}
 ) {
     var showPassword by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     LaunchedEffect(viewModel.loginSuccess) {
         if (viewModel.loginSuccess) {
             onLoginSuccess()
+        }
+    }
+    LaunchedEffect(viewModel.errorMessage) {
+        viewModel.errorMessage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -88,7 +96,7 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.TopCenter)
-                .padding(top = 80.dp),
+                .padding(top = 120.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -221,56 +229,23 @@ fun LoginScreen(
                         .clickable { navController.navigate("forgot_password?fromProfile=false") }
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(30.dp))
 
+
+                viewModel.errorMessage?.let {
+                    Text(
+                        text = it,
+                        color = Color.Red,
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
                 AppButton(
                     text = "Log In",
                     isLoading = viewModel.isLoading,
                     onClick = { viewModel.onLoginClick() },
                     enabled = !viewModel.isLoading
                 )
-
-                Spacer(modifier = Modifier.height(28.dp))
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Divider(modifier = Modifier.weight(1f))
-                    Text(
-                        text = "  Log in with  ",
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
-                    Divider(modifier = Modifier.weight(1f))
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(30.dp, Alignment.CenterHorizontally)
-                ) {
-                    listOf(
-                        R.drawable.ic_apple to "Apple",
-                        R.drawable.ic_facebook to "Facebook",
-                        R.drawable.ic_google to "Google"
-                    ).forEach { (iconRes, contentDesc) ->
-                        Box(
-                            modifier = Modifier
-                                .size(45.dp)
-                                .clip(CircleShape)
-                                .clickable { },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Image(
-                                painter = painterResource(id = iconRes),
-                                contentDescription = contentDesc,
-                                modifier = Modifier.size(50.dp)
-                            )
-                        }
-                    }
-                }
 
                 Spacer(modifier = Modifier.height(18.dp))
 
@@ -292,6 +267,7 @@ fun LoginScreen(
                     style = LocalTextStyle.current.copy(fontSize = 14.sp)
                 )
                 Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(30.dp))
 
                 Box(
                     modifier = Modifier

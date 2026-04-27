@@ -106,7 +106,7 @@ fun ForecastCard(
                     )
 
                     Text(
-                        "$${forecast.nextMonthAmount}",
+                        "$${forecast?.nextMonthAmount ?: 0}",
                         fontSize = 16.sp,
                         color=colorResource(R.color.deep_blue),
                         fontWeight = FontWeight.Bold

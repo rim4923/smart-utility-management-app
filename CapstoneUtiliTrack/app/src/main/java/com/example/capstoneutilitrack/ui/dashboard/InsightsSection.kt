@@ -118,7 +118,7 @@ fun InsightsCard(
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
-                        "$${insights.MonthValue}",
+                        "$${insights.MonthValue ?: 0}",
                         fontSize = 16.sp,
                         color=colorResource(R.color.deep_blue),
                         fontWeight = FontWeight.Bold

@@ -47,7 +47,7 @@ class PaymentViewModel @Inject constructor(
                 cards = repository.list()
                 selectedCard = cards.firstOrNull()
             } catch (e: Exception) {
-                e.printStackTrace()
+                errorMessage = e.message ?: "Failed to load cards"
             }
         }
     }

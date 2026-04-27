@@ -1,5 +1,6 @@
 package com.example.capstoneutilitrack.ui.dashboard
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -9,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -43,7 +45,13 @@ fun Content(
         }
         return
     }
+    val context = LocalContext.current
 
+    LaunchedEffect(error) {
+        error?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+        }
+    }
     if (error != null) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -59,7 +67,14 @@ fun Content(
 
     val dashboard = viewModel.dashboardState
 
-    val data: DashboardDto = dashboard ?: return@Content
+    val data = dashboard
+
+    if (data == null) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("No data available")
+        }
+        return
+    }
 
     Box {
         Column(

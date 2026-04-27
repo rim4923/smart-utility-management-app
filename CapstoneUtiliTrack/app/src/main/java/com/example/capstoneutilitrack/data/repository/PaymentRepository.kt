@@ -4,6 +4,7 @@ import com.example.capstoneutilitrack.data.network.PayBillsRequest
 import com.example.capstoneutilitrack.data.network.PayBillsResponse
 import com.example.capstoneutilitrack.data.network.PaymentApi
 import com.example.capstoneutilitrack.data.network.PaymentMethodResponse
+import com.example.capstoneutilitrack.data.remote.safeApiCall
 import com.example.capstoneutilitrack.model.AddCardRequest
 import com.example.capstoneutilitrack.model.PaymentCardDto
 import javax.inject.Inject
@@ -24,27 +25,15 @@ class PaymentRepository @Inject constructor(
     )
 
     suspend fun list(): List<PaymentCardDto> {
-        val res = api.getPaymentMethods()
-        if (res.isSuccessful && res.body() != null) {
-            return res.body()!!.map { map(it) }
-        }
-        throw Exception(res.errorBody()?.string() ?: "Failed to load cards")
+        val result = safeApiCall { api.getPaymentMethods() }
+        return result.map { map(it) }
     }
 
     suspend fun payBills(billIds: List<String>): PayBillsResponse {
-        val res = api.payBills(PayBillsRequest(billIds))
-
-        if (res.isSuccessful && res.body() != null) {
-            return res.body()!!
-        }
-
-        throw Exception(res.errorBody()?.string() ?: "Payment failed")
+        return safeApiCall { api.payBills(PayBillsRequest(billIds)) }
     }
 
     suspend fun addCard(card: AddCardRequest) {
-        val res = api.addCard(card)
-        if (!res.isSuccessful) {
-            throw Exception(res.errorBody()?.string() ?: "Failed to add card")
-        }
+        safeApiCall { api.addCard(card) }
     }
 }
