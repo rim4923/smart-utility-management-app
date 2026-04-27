@@ -189,7 +189,10 @@ fun TrendLabel(value: Double, modifier: Modifier = Modifier) {
         else -> Color(0xFFFF4747) // red
     }
 
-    val percent = String.format("%.2f", abs(value))
+    val percent = abs(value).let {
+        if (it % 1.0 == 0.0) it.toInt().toString()
+        else "%.1f".format(it)
+    }
 
     val directionText = when {
         isZero -> "higher"

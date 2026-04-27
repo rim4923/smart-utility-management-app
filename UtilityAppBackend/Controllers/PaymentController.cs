@@ -96,14 +96,14 @@ public class PaymentsController : ControllerBase
 
         using var transaction = _context.Database.BeginTransaction();
 
-        var total = bills.Sum(b => b.Cost);
+        var total = Math.Round(bills.Sum(b => b.Cost), 2);
         try {
 
         
             var payment = new Payment
             {
                 UserId = userId,
-                Amount = total,
+                Amount = total, // already rounded
                 Status = "SUCCESS",
                 CreatedAt = DateTime.UtcNow
             };

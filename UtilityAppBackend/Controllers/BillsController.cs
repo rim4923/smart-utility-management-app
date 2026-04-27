@@ -32,13 +32,14 @@ namespace UtilityAppBackend.Controllers
                 b.NextBillDate.Year == now.Year
             ).ToList();
 
-            var totalDue = monthlyBills.Sum(b => b.Cost);
+            var totalDue = Math.Round(monthlyBills.Sum(b => b.Cost), 2);
 
-            var totalPaid = monthlyBills
-                .Where(b => b.IsPaid)
-                .Sum(b => b.Cost);
+            var totalPaid = Math.Round(
+                monthlyBills.Where(b => b.IsPaid).Sum(b => b.Cost),
+                2
+            );
 
-            var amountLeft = totalDue - totalPaid;
+            var amountLeft = Math.Round(totalDue - totalPaid, 2);
 
             var utilities = bills.Select(b => new UtilityDto
             {
@@ -49,16 +50,21 @@ namespace UtilityAppBackend.Controllers
                     : (b.NextBillDate < DateTime.UtcNow ? "Overdue" : "Pending"),
                 Type = b.Type,
                 Currency = b.Currency,
-                Cost = b.Cost,
+                Cost = Math.Round(b.Cost,2),
 
-                Consumption = b.Consumption,
+                Consumption = Math.Round(b.Consumption,2),
                 ConsumptionUnit = b.ConsumptionUnit,
                 NextBillDate = b.NextBillDate.ToString("o"),
                 PricePerUnit = b.PricePerUnit,
 
                 StartDate = b.StartDate,
-                PastMonthChange = b.PastMonthChange,
-                ForecastChange = b.ForecastChange
+                PastMonthChange = b.PastMonthChange != null
+                    ? Math.Round(b.PastMonthChange.Value, 1)
+                    : null,
+
+                ForecastChange = b.ForecastChange != null
+                    ? Math.Round(b.ForecastChange.Value, 1)
+                    : null,
             }).ToList();
 
             var response = new BillsDashboardResponse
@@ -67,7 +73,7 @@ namespace UtilityAppBackend.Controllers
                 {
                     TotalAmountDue = totalDue,
                     AmountPaid = totalPaid,
-                    AmountLeft = totalDue,
+                    AmountLeft = amountLeft,
                     NextBillDate = bills.FirstOrDefault()?.NextBillDate.ToString("o"),
                     Currency = bills.Any() ? bills.First().Currency : "USD"
                 },
@@ -98,12 +104,12 @@ namespace UtilityAppBackend.Controllers
                     ? "Paid"
                     : (bill.NextBillDate < DateTime.UtcNow ? "Overdue" : "Pending"),
 
-                Cost = bill.Cost,
+                Cost = Math.Round(bill.Cost, 2),
                 Currency = bill.Currency,
 
                 NextBillDate = bill.NextBillDate,
 
-                Consumption = bill.Consumption,
+                Consumption = Math.Round(bill.Consumption,2),
                 ConsumptionUnit = bill.ConsumptionUnit,
                 PricePerUnit = bill.PricePerUnit,
 

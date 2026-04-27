@@ -53,13 +53,13 @@ namespace UtilityAppBackend.Controllers
                 .ToList();
 
             var currentBills = bills.Where(b =>
-                b.NextBillDate.Month == currentMonth &&
-                b.NextBillDate.Year == currentYear
+                b.StartDate.Month == currentMonth &&
+                b.StartDate.Year == currentYear
             ).ToList();
 
             var previousBills = bills.Where(b =>
-                b.NextBillDate.Month == previousMonth &&
-                b.NextBillDate.Year == previousYear
+                b.StartDate.Month == previousMonth &&
+                b.StartDate.Year == previousYear
             ).ToList();
 
             var currentTotal = currentBills.Sum(b => b.Cost);
@@ -106,13 +106,6 @@ namespace UtilityAppBackend.Controllers
                 totalNextMonthForecast += prediction[0]; // only next month
             }
 
-            double forecastChange = SafeDivide(
-                totalNextMonthForecast - totalCurrentMonth,
-                totalCurrentMonth
-            ) * 100;
-
-            forecastChange = Math.Clamp(Math.Round(forecastChange, 1), -100, 100);
-
             var forecastItems = new List<MonthlyForecastItemDto>();
 
             var last3Months = bills
@@ -125,6 +118,14 @@ namespace UtilityAppBackend.Controllers
                 .OrderBy(x => x.Date)
                 .TakeLast(3)
                 .ToList();
+            
+            
+            double forecastChange = SafeDivide(
+                totalNextMonthForecast - totalCurrentMonth,
+                totalCurrentMonth
+            ) * 100;
+
+            forecastChange = Math.Clamp(Math.Round(forecastChange, 1), -100, 100);
 
             foreach (var m in last3Months)
             {
